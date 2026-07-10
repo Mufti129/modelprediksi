@@ -276,6 +276,56 @@ if check_password():
     st.subheader(" Pemetaan Spasial Interaktif")
     peta_folium = generate_map(df_filtered)
     st_folium(peta_folium, width="100%", height=650, returned_objects=[])
+
+    # --- BAGIAN FOOTER / DATA VIEW ---
+    st.markdown("---")
+    
+    # --- SUMMARY PERFORMA MODEL (MATCH vs MISMATCH) ---
+    st.subheader("Ringkasan Hasil Prediksi Model")
+    
+    # Membuat 3 kolom untuk masing-masing model
+    sum_col1, sum_col2, sum_col3 = st.columns(3)
+    
+    with sum_col1:
+        st.markdown("### **Model OLS**")
+        if 'Mismatch_OLS' in df_filtered.columns:
+            ols_match = len(df_filtered[df_filtered['Mismatch_OLS'] == 'Match'])
+            ols_mismatch = len(df_filtered[df_filtered['Mismatch_OLS'] != 'Match'])
+            st.write(f" **Match:** {ols_match} Cabang")
+            st.write(f" **Mismatch:** {ols_mismatch} Cabang")
+        else:
+            st.info("Data Mismatch_OLS tidak ditemukan.")
+            
+    with sum_col2:
+        st.markdown("### **Model Random Forest**")
+        if 'Mismatch_RF' in df_filtered.columns:
+            rf_match = len(df_filtered[df_filtered['Mismatch_RF'] == 'Match'])
+            rf_mismatch = len(df_filtered[df_filtered['Mismatch_RF'] != 'Match'])
+            st.write(f" **Match:** {rf_match} Cabang")
+            st.write(f" **Mismatch:** {rf_mismatch} Cabang")
+        else:
+            st.info("Data Mismatch_RF tidak ditemukan.")
+            
+    with sum_col3:
+        st.markdown("### **Model GWR**")
+        if 'Mismatch_GWR' in df_filtered.columns:
+            gwr_match = len(df_filtered[df_filtered['Mismatch_GWR'] == 'Match'])
+            gwr_mismatch = len(df_filtered[df_filtered['Mismatch_GWR'] != 'Match'])
+            st.write(f" **Match:** {gwr_match} Cabang")
+            st.write(f" **Mismatch:** {gwr_mismatch} Cabang")
+        else:
+            st.info("Data Mismatch_GWR tidak ditemukan.")
+
+    st.markdown("</br>", unsafe_allow_html=True)
+
+    # --- EXPANDER DETAIL DATABASE ---
+    with st.expander("Lihat Detail Database Cabang PGI"):
+        kolom_tabel = ['nama_cabang', 'Omzet_Actual', 'Kategori_Omzet_Actual', 'Mismatch_OLS', 'Mismatch_RF', 'Mismatch_GWR']
+        kolom_eksis = [c for c in kolom_tabel if c in df_filtered.columns]
+        st.dataframe(df_filtered[kolom_eksis], use_container_width=True)
+
+
+
     
     # --- BAGIAN FOOTER / DATA VIEW ---
     st.markdown("---")
