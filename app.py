@@ -324,12 +324,3 @@ if check_password():
         kolom_eksis = [c for c in kolom_tabel if c in df_filtered.columns]
         st.dataframe(df_filtered[kolom_eksis], use_container_width=True)
 
-
-
-    
-    # --- BAGIAN FOOTER / DATA VIEW ---
-    st.markdown("---")
-    with st.expander("Lihat Detail Database Cabang PGI"):
-        kolom_tabel = ['nama_cabang', 'Omzet_Actual', 'Kategori_Omzet_Actual', 'Mismatch_OLS', 'Mismatch_RF', 'Mismatch_GWR']
-        kolom_eksis = [c for c in kolom_tabel if c in df_filtered.columns]
-        st.dataframe(df_filtered[kolom_eksis], use_container_width=True)
