@@ -93,11 +93,17 @@ if check_password():
     # --- PEMBUATAN PETA INTERAKTIF FOLIUM ---
     def generate_map(dataframe):
         def get_color(kategori):
-            if kategori == 'Tinggi': return '#2ca02c'
-            elif kategori == 'Sedang': return '#ff7f0e'
-            elif kategori == 'Rendah': return '#d62728'
-            else: return '#7f7f7f'
-    
+            if kategori == 'Sangat Tinggi':
+                return '#7f7f7f'  # Abu-abu atau ganti dengan warna lain (misal: ungu '#9467bd')
+            elif kategori == 'Tinggi':
+                return '#2ca02c'  # Hijau
+            elif kategori == 'Sedang':
+                return '#ff7f0e'  # Jingga
+            elif kategori == 'Rendah':
+                return '#d62728'  # Merah
+            else:
+                return '#7f7f7f'  # Default jika tidak cocok
+                
         if dataframe.empty or pd.isna(dataframe['latitude'].mean()):
             map_center = [-2.548926, 118.014863]
             zoom_init = 5
@@ -108,9 +114,9 @@ if check_password():
         m = folium.Map(location=map_center, zoom_start=zoom_init, tiles='OpenStreetMap')
     
         layer_aktual = folium.FeatureGroup(name=' Performa Aktual Cabang (K-Means)', show=True)
-        layer_ols = folium.FeatureGroup(name=' Prediksi OLS (70.10%)', show=False)
-        layer_rf = folium.FeatureGroup(name=' Prediksi Random Forest (85.12%)', show=False)
-        layer_gwr = folium.FeatureGroup(name=' Prediksi GWR (72.85%)', show=False)
+        layer_ols = folium.FeatureGroup(name=' Prediksi OLS (48.04%)', show=False)
+        layer_rf = folium.FeatureGroup(name=' Prediksi Random Forest (71.15%)', show=False)
+        layer_gwr = folium.FeatureGroup(name=' Prediksi GWR (54.18%)', show=False)
     
         layer_aktual.add_to(m)
         layer_ols.add_to(m)
@@ -251,13 +257,14 @@ if check_password():
         </style>
         '''
         m.get_root().header.add_child(folium.Element(css_fix))
-    
+
         legend_html = '''
-             <div style="position: fixed; bottom: 25px; left: 25px; width: 255px; height: 165px; border: 1px solid #bbb; z-index:9999; font-size:10.5px; font-family: Arial, sans-serif; background-color: white; opacity: 0.95; padding: 10px; border-radius: 6px; box-shadow: 1px 1px 4px rgba(0,0,0,0.15);">
+             <div style="position: fixed; bottom: 25px; left: 25px; width: 255px; height: 185px; border: 1px solid #bbb; z-index:9999; font-size:10.5px; font-family: Arial, sans-serif; background-color: white; opacity: 0.95; padding: 10px; border-radius: 6px; box-shadow: 1px 1px 4px rgba(0,0,0,0.15);">
              <b style="font-size: 11.5px; display: block; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 2px;">Kriteria Omzet Cabang PGI</b>
-             <div style="margin-bottom: 3px;"><i class="fa fa-circle" style="color:#2ca02c; font-size: 11px;"></i> <b>Tinggi:</b> Rp 1.140.741.667 - Rp 2.209.908.333</div>
-             <div style="margin-bottom: 3px;"><i class="fa fa-circle" style="color:#ff7f0e; font-size: 11px;"></i> <b>Sedang:</b> Rp 549.500.000 - Rp 1.097.925.000</div>
-             <div style="margin-bottom: 5px;"><i class="fa fa-circle" style="color:#d62728; font-size: 11px;"></i> <b>Rendah:</b> Rp 99.725.000 - Rp 547.475.000</div>
+             <div style="margin-bottom: 3px;"><i class="fa fa-circle" style="color:#9467bd; font-size: 11px;"></i> <b>Sangat Tinggi:</b> > Rp 1.000.000.000</div>
+             <div style="margin-bottom: 3px;"><i class="fa fa-circle" style="color:#2ca02c; font-size: 11px;"></i> <b>Tinggi:</b> Rp 500.000.001 - Rp 1.000.000.000</div>
+             <div style="margin-bottom: 3px;"><i class="fa fa-circle" style="color:#ff7f0e; font-size: 11px;"></i> <b>Sedang:</b> Rp 300.000.000 - Rp 500.000.000</div>
+             <div style="margin-bottom: 5px;"><i class="fa fa-circle" style="color:#d62728; font-size: 11px;"></i> <b>Rendah:</b> < Rp 300.000.000</div>
              <hr style="margin: 4px 0; border: 0; border-top: 1px solid #eee;">
              <div style="margin-top: 4px; font-size: 9.5px; color: #555; background: #fffde7; padding: 3px; border-radius: 3px; border-left: 2px solid #fbc02d;"><b style="color: #333;">Simbol Mismatch:</b> <i class="fa fa-times" style="color:red; font-weight:bold;"></i> (Tanda Silang)</div>
              </div>
