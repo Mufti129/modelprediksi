@@ -45,7 +45,8 @@ if check_password():
     @st.cache_data
     def load_data():
         # Menggunakan link ekspor CSV dari Google Sheets Anda
-        sheet_url = "https://docs.google.com/spreadsheets/d/15cug7vGihg3Pf2oTRl2EX_ySB55orD43a3A3-_6o7qo/export?format=csv&gid=784346653"
+        #sheet_url = "https://docs.google.com/spreadsheets/d/15cug7vGihg3Pf2oTRl2EX_ySB55orD43a3A3-_6o7qo/export?format=csv&gid=784346653"
+        sheet_url = "https://docs.google.com/spreadsheets/d/15cug7vGihg3Pf2oTRl2EX_ySB55orD43a3A3-_6o7qo/export?format=csv&gid=1980765925"
         df = pd.read_csv(sheet_url)
         return df
     
