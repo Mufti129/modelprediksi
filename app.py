@@ -281,9 +281,8 @@ if check_password():
     st.markdown("---")
     
     # --- SUMMARY PERFORMA MODEL (MATCH vs MISMATCH) ---
-    st.subheader("Ringkasan Hasil Prediksi Model")
+    st.subheader("Ringkasan Performa Validasi Model")
     
-    # Membuat 3 kolom untuk masing-masing model
     sum_col1, sum_col2, sum_col3 = st.columns(3)
     
     with sum_col1:
@@ -291,8 +290,17 @@ if check_password():
         if 'Mismatch_OLS' in df_filtered.columns:
             ols_match = len(df_filtered[df_filtered['Mismatch_OLS'] == 'Match'])
             ols_mismatch = len(df_filtered[df_filtered['Mismatch_OLS'] != 'Match'])
-            st.write(f" **Match:** {ols_match} Cabang")
-            st.write(f" **Mismatch:** {ols_mismatch} Cabang")
+            st.success(f" **Match:** {ols_match} Cabang")
+            st.error(f" **Mismatch:** {ols_mismatch} Cabang")
+            
+            # Detail rincian kasus Mismatch OLS
+            df_mism_ols = df_filtered[df_filtered['Mismatch_OLS'] != 'Match']
+            if not df_mism_ols.empty:
+                st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
+                # Menghitung kombinasi Aktual dan Prediksi
+                detail_ols = df_mism_ols.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_OLS']).size().reset_index(name='Jumlah')
+                for _, row_d in detail_ols.iterrows():
+                    st.write(f"• {row_d['Kategori_Omzet_Actual']} ➔ {row_d['Kategori_Prediksi_OLS']}: **{row_d['Jumlah']} Cabang**")
         else:
             st.info("Data Mismatch_OLS tidak ditemukan.")
             
@@ -301,8 +309,16 @@ if check_password():
         if 'Mismatch_RF' in df_filtered.columns:
             rf_match = len(df_filtered[df_filtered['Mismatch_RF'] == 'Match'])
             rf_mismatch = len(df_filtered[df_filtered['Mismatch_RF'] != 'Match'])
-            st.write(f" **Match:** {rf_match} Cabang")
-            st.write(f" **Mismatch:** {rf_mismatch} Cabang")
+            st.success(f" **Match:** {rf_match} Cabang")
+            st.error(f" **Mismatch:** {rf_mismatch} Cabang")
+            
+            # Detail rincian kasus Mismatch RF
+            df_mism_rf = df_filtered[df_filtered['Mismatch_RF'] != 'Match']
+            if not df_mism_rf.empty:
+                st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
+                detail_rf = df_mism_rf.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_RF']).size().reset_index(name='Jumlah')
+                for _, row_d in detail_rf.iterrows():
+                    st.write(f"• {row_d['Kategori_Omzet_Actual']} ➔ {row_d['Kategori_Prediksi_RF']}: **{row_d['Jumlah']} Cabang**")
         else:
             st.info("Data Mismatch_RF tidak ditemukan.")
             
@@ -311,8 +327,16 @@ if check_password():
         if 'Mismatch_GWR' in df_filtered.columns:
             gwr_match = len(df_filtered[df_filtered['Mismatch_GWR'] == 'Match'])
             gwr_mismatch = len(df_filtered[df_filtered['Mismatch_GWR'] != 'Match'])
-            st.write(f" **Match:** {gwr_match} Cabang")
-            st.write(f" **Mismatch:** {gwr_mismatch} Cabang")
+            st.success(f" **Match:** {gwr_match} Cabang")
+            st.error(f" **Mismatch:** {gwr_mismatch} Cabang")
+            
+            # Detail rincian kasus Mismatch GWR
+            df_mism_gwr = df_filtered[df_filtered['Mismatch_GWR'] != 'Match']
+            if not df_mism_gwr.empty:
+                st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
+                detail_gwr = df_mism_gwr.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_GWR']).size().reset_index(name='Jumlah')
+                for _, row_d in detail_gwr.iterrows():
+                    st.write(f"• {row_d['Kategori_Omzet_Actual']} ➔ {row_d['Kategori_Prediksi_GWR']}: **{row_d['Jumlah']} Cabang**")
         else:
             st.info("Data Mismatch_GWR tidak ditemukan.")
 
@@ -323,4 +347,4 @@ if check_password():
         kolom_tabel = ['nama_cabang', 'Omzet_Actual', 'Kategori_Omzet_Actual', 'Mismatch_OLS', 'Mismatch_RF', 'Mismatch_GWR']
         kolom_eksis = [c for c in kolom_tabel if c in df_filtered.columns]
         st.dataframe(df_filtered[kolom_eksis], use_container_width=True)
-
+    
