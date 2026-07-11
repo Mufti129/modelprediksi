@@ -137,7 +137,7 @@ if check_password():
     
         m = folium.Map(location=map_center, zoom_start=zoom_init, tiles='OpenStreetMap')
     
-        layer_aktual = folium.FeatureGroup(name=' Performa Aktual Cabang (K-Means)', show=True)
+        layer_aktual = folium.FeatureGroup(name=' Performa Aktual Cabang (KPI Manajemen)', show=True)
         layer_ols = folium.FeatureGroup(name=' Prediksi OLS (48.04%)', show=False)
         layer_rf = folium.FeatureGroup(name=' Prediksi Random Forest (71.15%)', show=False)
         layer_gwr = folium.FeatureGroup(name=' Prediksi GWR (54.18%)', show=False)
