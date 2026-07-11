@@ -80,13 +80,13 @@ if check_password():
         st.metric(label="Total Cabang Ditampilkan", value=f"{len(df_filtered)} Cabang")
     with col2:
         m_ols_count = len(df_filtered[df_filtered['Mismatch_OLS'] != 'Match']) if 'Mismatch_OLS' in df_filtered.columns else 0
-        st.metric(label="OLS Mismatch", value=f"{m_ols_count} Kasus", delta="Akurasi: 70.10%", delta_color="off")
+        st.metric(label="OLS Mismatch", value=f"{m_ols_count} Kasus", delta="Akurasi: 48.04%", delta_color="off")
     with col3:
         m_rf_count = len(df_filtered[df_filtered['Mismatch_RF'] != 'Match']) if 'Mismatch_RF' in df_filtered.columns else 0
-        st.metric(label="Random Forest Mismatch", value=f"{m_rf_count} Kasus", delta="Akurasi: 85.12%", delta_color="normal")
+        st.metric(label="Random Forest Mismatch", value=f"{m_rf_count} Kasus", delta="Akurasi: 71.15%", delta_color="normal")
     with col4:
         m_gwr_count = len(df_filtered[df_filtered['Mismatch_GWR'] != 'Match']) if 'Mismatch_GWR' in df_filtered.columns else 0
-        st.metric(label="GWR Mismatch", value=f"{m_gwr_count} Kasus", delta="Akurasi: 72.85%", delta_color="off")
+        st.metric(label="GWR Mismatch", value=f"{m_gwr_count} Kasus", delta="Akurasi: 54.18%", delta_color="off")
     
     st.markdown("---")
     
