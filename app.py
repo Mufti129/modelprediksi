@@ -55,14 +55,18 @@ if check_password():
         def klasifikasi_baru(omzet):
             if pd.isna(omzet):
                 return '-'
-            if omzet < 300000000:
-                return "Rendah"
-            elif omzet <= 500000000:
-                return "Sedang"
-            elif omzet <= 1000000000:
-                return "Tinggi"
-            else:
-                return "Sangat Tinggi"
+            try:
+                val = float(omzet)
+                if val < 300000000:
+                    return "Rendah"
+                elif val <= 500000000:
+                    return "Sedang"
+                elif val <= 1000000000:
+                    return "Tinggi"
+                else:
+                    return "Sangat Tinggi"
+            except:
+                return '-'
 
         # Terapkan fungsi klasifikasi baru ke semua kolom nominal omzet
         kolom_omzet = ['Omzet_Actual', 'Prediksi_Omzet_OLS', 'Prediksi_Omzet_RF', 'Prediksi_Omzet_GWR']
@@ -300,7 +304,7 @@ if check_password():
     st.markdown("---")
     
     # --- SUMMARY PERFORMA MODEL (MATCH vs MISMATCH) ---
-    st.subheader("Ringkasan Performa Validasi Model")
+    st.subheader("📊 Ringkasan Performa Validasi Model")
     
     sum_col1, sum_col2, sum_col3 = st.columns(3)
     
@@ -309,16 +313,19 @@ if check_password():
         if 'Mismatch_OLS' in df_filtered.columns:
             ols_match = len(df_filtered[df_filtered['Mismatch_OLS'] == 'Match'])
             ols_mismatch = len(df_filtered[df_filtered['Mismatch_OLS'] != 'Match'])
-            st.success(f" **Match:** {ols_match} Cabang")
-            st.error(f" **Mismatch:** {ols_mismatch} Cabang")
+            st.success(f"✅ **Match:** {ols_match} Cabang")
+            st.error(f"❌ **Mismatch:** {ols_mismatch} Cabang")
             
-            # Detail rincian kasus Mismatch OLS (Dengan Pengecekan Aman)
+            # Menggunakan Pure Python Dictionary agar aman dari bug memori pandas
             df_mism_ols = df_filtered[df_filtered['Mismatch_OLS'] != 'Match']
-            if not df_mism_ols.empty and 'Kategori_Omzet_Actual' in df_mism_ols.columns and 'Kategori_Prediksi_OLS' in df_mism_ols.columns:
+            if not df_mism_ols.empty:
                 st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
-                detail_ols = df_mism_ols.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_OLS']).size().reset_index(name='Jumlah')
-                for _, row_d in detail_ols.iterrows():
-                    st.write(f"• {row_d['Kategori_Omzet_Actual']} ➔ {row_d['Kategori_Prediksi_OLS']}: **{row_d['Jumlah']} Cabang**")
+                counts_ols = {}
+                for _, r in df_mism_ols.iterrows():
+                    kombinasi = f"{r.get('Kategori_Omzet_Actual', '-')} ➔ {r.get('Kategori_Prediksi_OLS', '-')}"
+                    counts_ols[kombinasi] = counts_ols.get(kombinasi, 0) + 1
+                for key, val in sorted(counts_ols.items()):
+                    st.write(f"• {key}: **{val} Cabang**")
         else:
             st.info("Data Mismatch_OLS tidak ditemukan.")
             
@@ -327,16 +334,19 @@ if check_password():
         if 'Mismatch_RF' in df_filtered.columns:
             rf_match = len(df_filtered[df_filtered['Mismatch_RF'] == 'Match'])
             rf_mismatch = len(df_filtered[df_filtered['Mismatch_RF'] != 'Match'])
-            st.success(f" **Match:** {rf_match} Cabang")
-            st.error(f" **Mismatch:** {rf_mismatch} Cabang")
+            st.success(f"✅ **Match:** {rf_match} Cabang")
+            st.error(f"❌ **Mismatch:** {rf_mismatch} Cabang")
             
-            # Detail rincian kasus Mismatch RF (Dengan Pengecekan Aman)
+            # Menggunakan Pure Python Dictionary agar aman dari bug memori pandas
             df_mism_rf = df_filtered[df_filtered['Mismatch_RF'] != 'Match']
-            if not df_mism_rf.empty and 'Kategori_Omzet_Actual' in df_mism_rf.columns and 'Kategori_Prediksi_RF' in df_mism_rf.columns:
+            if not df_mism_rf.empty:
                 st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
-                detail_rf = df_mism_rf.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_RF']).size().reset_index(name='Jumlah')
-                for _, row_d in detail_rf.iterrows():
-                    st.write(f"• {row_d['Kategori_Omzet_Actual']} ➔ {row_d['Kategori_Prediksi_RF']}: **{row_d['Jumlah']} Cabang**")
+                counts_rf = {}
+                for _, r in df_mism_rf.iterrows():
+                    kombinasi = f"{r.get('Kategori_Omzet_Actual', '-')} ➔ {r.get('Kategori_Prediksi_RF', '-')}"
+                    counts_rf[kombinasi] = counts_rf.get(kombinasi, 0) + 1
+                for key, val in sorted(counts_rf.items()):
+                    st.write(f"• {key}: **{val} Cabang**")
         else:
             st.info("Data Mismatch_RF tidak ditemukan.")
             
@@ -345,16 +355,19 @@ if check_password():
         if 'Mismatch_GWR' in df_filtered.columns:
             gwr_match = len(df_filtered[df_filtered['Mismatch_GWR'] == 'Match'])
             gwr_mismatch = len(df_filtered[df_filtered['Mismatch_GWR'] != 'Match'])
-            st.success(f" **Match:** {gwr_match} Cabang")
-            st.error(f" **Mismatch:** {gwr_mismatch} Cabang")
+            st.success(f"✅ **Match:** {gwr_match} Cabang")
+            st.error(f"❌ **Mismatch:** {gwr_mismatch} Cabang")
             
-            # Detail rincian kasus Mismatch GWR (Dengan Pengecekan Aman)
+            # Menggunakan Pure Python Dictionary agar aman dari bug memori pandas
             df_mism_gwr = df_filtered[df_filtered['Mismatch_GWR'] != 'Match']
-            if not df_mism_gwr.empty and 'Kategori_Omzet_Actual' in df_mism_gwr.columns and 'Kategori_Prediksi_GWR' in df_mism_gwr.columns:
+            if not df_mism_gwr.empty:
                 st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
-                detail_gwr = df_mism_gwr.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_GWR']).size().reset_index(name='Jumlah')
-                for _, row_d in detail_gwr.iterrows():
-                    st.write(f"• {row_d['Kategori_Omzet_Actual']} ➔ {row_d['Kategori_Prediksi_GWR']}: **{row_d['Jumlah']} Cabang**")
+                counts_gwr = {}
+                for _, r in df_mism_gwr.iterrows():
+                    kombinasi = f"{r.get('Kategori_Omzet_Actual', '-')} ➔ {r.get('Kategori_Prediksi_GWR', '-')}"
+                    counts_gwr[kombinasi] = counts_gwr.get(kombinasi, 0) + 1
+                for key, val in sorted(counts_gwr.items()):
+                    st.write(f"• {key}: **{val} Cabang**")
         else:
             st.info("Data Mismatch_GWR tidak ditemukan.")
 
