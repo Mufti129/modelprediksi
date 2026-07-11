@@ -44,14 +44,34 @@ if check_password():
     # --- FUNGSI LOADING DATABASE LANGSUNG DARI GOOGLE SHEETS ---
     @st.cache_data
     def load_data():
-        # Menggunakan link ekspor CSV dari Google Sheets Anda
-        #sheet_url = "https://docs.google.com/spreadsheets/d/15cug7vGihg3Pf2oTRl2EX_ySB55orD43a3A3-_6o7qo/export?format=csv&gid=784346653"
         sheet_url = "https://docs.google.com/spreadsheets/d/15cug7vGihg3Pf2oTRl2EX_ySB55orD43a3A3-_6o7qo/export?format=csv&gid=1980765925"
         df = pd.read_csv(sheet_url)
         return df
     
     try:
         df = load_data()
+        
+        # --- PROSES RE-KLASIFIKASI KATEGORI SESUAI RUMUS IFS BARU ---
+        def klasifikasi_baru(omzet):
+            if pd.isna(omzet):
+                return '-'
+            if omzet < 300000000:
+                return "Rendah"
+            elif omzet <= 500000000:
+                return "Sedang"
+            elif omzet <= 1000000000:
+                return "Tinggi"
+            else:
+                return "Sangat Tinggi"
+
+        # Terapkan fungsi klasifikasi baru ke semua kolom nominal omzet
+        kolom_omzet = ['Omzet_Actual', 'Prediksi_Omzet_OLS', 'Prediksi_Omzet_RF', 'Prediksi_Omzet_GWR']
+        kolom_kategori = ['Kategori_Omzet_Actual', 'Kategori_Prediksi_OLS', 'Kategori_Prediksi_RF', 'Kategori_Prediksi_GWR']
+
+        for omz_col, kat_col in zip(kolom_omzet, kolom_kategori):
+            if omz_col in df.columns:
+                df[kat_col] = df[omz_col].apply(klasifikasi_baru)
+                
     except Exception as e:
         st.error(f"Gagal memuat database dari Google Sheets. Detail: {e}")
         st.stop()
@@ -94,7 +114,7 @@ if check_password():
     def generate_map(dataframe):
         def get_color(kategori):
             if kategori == 'Sangat Tinggi':
-                return '#7f7f7f'  # Abu-abu atau ganti dengan warna lain (misal: ungu '#9467bd')
+                return '#9467bd'  # Ungu
             elif kategori == 'Tinggi':
                 return '#2ca02c'  # Hijau
             elif kategori == 'Sedang':
@@ -139,7 +159,6 @@ if check_password():
             if pd.isna(row['latitude']) or pd.isna(row['longitude']):
                 continue
     
-            # --- PROTEKSI PEMANGGILAN KOLOM (Menggunakan Huruf Besar Sesuai Sheet) ---
             omzet_act = int(row['Omzet_Actual']) if 'Omzet_Actual' in row and pd.notna(row['Omzet_Actual']) else 0
             pred_ols = int(row['Prediksi_Omzet_OLS']) if 'Prediksi_Omzet_OLS' in row and pd.notna(row['Prediksi_Omzet_OLS']) else 0
             pred_rf = int(row['Prediksi_Omzet_RF']) if 'Prediksi_Omzet_RF' in row and pd.notna(row['Prediksi_Omzet_RF']) else 0
@@ -293,11 +312,10 @@ if check_password():
             st.success(f" **Match:** {ols_match} Cabang")
             st.error(f" **Mismatch:** {ols_mismatch} Cabang")
             
-            # Detail rincian kasus Mismatch OLS
+            # Detail rincian kasus Mismatch OLS (Dengan Pengecekan Aman)
             df_mism_ols = df_filtered[df_filtered['Mismatch_OLS'] != 'Match']
-            if not df_mism_ols.empty:
+            if not df_mism_ols.empty and 'Kategori_Omzet_Actual' in df_mism_ols.columns and 'Kategori_Prediksi_OLS' in df_mism_ols.columns:
                 st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
-                # Menghitung kombinasi Aktual dan Prediksi
                 detail_ols = df_mism_ols.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_OLS']).size().reset_index(name='Jumlah')
                 for _, row_d in detail_ols.iterrows():
                     st.write(f"• {row_d['Kategori_Omzet_Actual']} ➔ {row_d['Kategori_Prediksi_OLS']}: **{row_d['Jumlah']} Cabang**")
@@ -312,9 +330,9 @@ if check_password():
             st.success(f" **Match:** {rf_match} Cabang")
             st.error(f" **Mismatch:** {rf_mismatch} Cabang")
             
-            # Detail rincian kasus Mismatch RF
+            # Detail rincian kasus Mismatch RF (Dengan Pengecekan Aman)
             df_mism_rf = df_filtered[df_filtered['Mismatch_RF'] != 'Match']
-            if not df_mism_rf.empty:
+            if not df_mism_rf.empty and 'Kategori_Omzet_Actual' in df_mism_rf.columns and 'Kategori_Prediksi_RF' in df_mism_rf.columns:
                 st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
                 detail_rf = df_mism_rf.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_RF']).size().reset_index(name='Jumlah')
                 for _, row_d in detail_rf.iterrows():
@@ -330,9 +348,9 @@ if check_password():
             st.success(f" **Match:** {gwr_match} Cabang")
             st.error(f" **Mismatch:** {gwr_mismatch} Cabang")
             
-            # Detail rincian kasus Mismatch GWR
+            # Detail rincian kasus Mismatch GWR (Dengan Pengecekan Aman)
             df_mism_gwr = df_filtered[df_filtered['Mismatch_GWR'] != 'Match']
-            if not df_mism_gwr.empty:
+            if not df_mism_gwr.empty and 'Kategori_Omzet_Actual' in df_mism_gwr.columns and 'Kategori_Prediksi_GWR' in df_mism_gwr.columns:
                 st.markdown("**Rincian Pola Mismatch (Aktual ➔ Prediksi):**")
                 detail_gwr = df_mism_gwr.groupby(['Kategori_Omzet_Actual', 'Kategori_Prediksi_GWR']).size().reset_index(name='Jumlah')
                 for _, row_d in detail_gwr.iterrows():
@@ -347,4 +365,3 @@ if check_password():
         kolom_tabel = ['nama_cabang', 'Omzet_Actual', 'Kategori_Omzet_Actual', 'Mismatch_OLS', 'Mismatch_RF', 'Mismatch_GWR']
         kolom_eksis = [c for c in kolom_tabel if c in df_filtered.columns]
         st.dataframe(df_filtered[kolom_eksis], use_container_width=True)
-    
