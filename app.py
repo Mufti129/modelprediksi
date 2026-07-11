@@ -304,7 +304,7 @@ if check_password():
     st.markdown("---")
     
     # --- SUMMARY PERFORMA MODEL (MATCH vs MISMATCH) ---
-    st.subheader("📊 Ringkasan Performa Validasi Model")
+    st.subheader("Ringkasan Performa Validasi Model")
     
     sum_col1, sum_col2, sum_col3 = st.columns(3)
     
