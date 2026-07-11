@@ -1,6 +1,4 @@
-streamlit>=1.35.0
-folium>=0.16.0
-streamlit-folium>=0.19.0
-pandas>=2.0.0
-pip uninstall -y pyproj shapely fiona
-pip install --no-binary :all: pyproj shapely
+streamlit
+folium
+streamlit-folium
+pandas
