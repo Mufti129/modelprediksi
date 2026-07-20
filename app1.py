@@ -98,7 +98,7 @@ if check_password():
     st.title("Dashboard Klasifikasi Omzet & Validasi Mismatch Model Prediksi")
     st.markdown("Spasial interaktif untuk memetakan performa aktual kantor cabang PGI serta mengevaluasi akurasi prediksi model OLS, Random Forest, dan GWR.")
     
-    # --- TAMPILAN METRIK (Menyesuaikan Nama Kolom Original di Sheet) ---
+    # --- TAMPILAN METRIK ---
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric(label="Total Cabang Ditampilkan", value=f"{len(df_filtered)} Cabang")
@@ -137,6 +137,7 @@ if check_password():
     
         m = folium.Map(location=map_center, zoom_start=zoom_init, tiles='OpenStreetMap')
     
+        # Layer Utama
         layer_aktual = folium.FeatureGroup(name=' Performa Aktual Cabang (KPI Manajemen)', show=True)
         layer_ols = folium.FeatureGroup(name=' Prediksi OLS (48.04%)', show=False)
         layer_rf = folium.FeatureGroup(name=' Prediksi Random Forest (71.15%)', show=False)
@@ -147,6 +148,16 @@ if check_password():
         layer_rf.add_to(m)
         layer_gwr.add_to(m)
     
+        # Layer Khusus MATCH
+        layer_match_ols = folium.FeatureGroup(name=' Match (OLS)', show=False)
+        layer_match_rf  = folium.FeatureGroup(name=' Match (RF)', show=False)
+        layer_match_gwr = folium.FeatureGroup(name=' Match (GWR)', show=False)
+        
+        layer_match_ols.add_to(m)
+        layer_match_rf.add_to(m)
+        layer_match_gwr.add_to(m)
+    
+        # Layer Khusus MISMATCH (Berdasarkan Tipe Mismatch)
         mismatch_types_ols = sorted([t for t in dataframe['Mismatch_OLS'].unique() if t != 'Match']) if 'Mismatch_OLS' in dataframe.columns else []
         mismatch_types_rf  = sorted([t for t in dataframe['Mismatch_RF'].unique() if t != 'Match']) if 'Mismatch_RF' in dataframe.columns else []
         mismatch_types_gwr = sorted([t for t in dataframe['Mismatch_GWR'].unique() if t != 'Match']) if 'Mismatch_GWR' in dataframe.columns else []
@@ -215,6 +226,7 @@ if check_password():
             popup_rf     = f'<div style="font-family: Arial, sans-serif; width: 300px; padding: 10px;">{tabel_html}<div style="margin-top: 5px; font-size: 11px; background: #fffde7; padding: 5px; border-radius: 4px;">Status RF: <b>{row.get("Mismatch_RF", "Match")}</b></div></div>'
             popup_gwr    = f'<div style="font-family: Arial, sans-serif; width: 300px; padding: 10px;">{tabel_html}<div style="margin-top: 5px; font-size: 11px; background: #e8f5e9; padding: 5px; border-radius: 4px;">Status GWR: <b>{row.get("Mismatch_GWR", "Match")}</b></div></div>'
     
+            # Lingkaran Utama untuk Setiap Layer Model
             folium.CircleMarker(
                 location=[row['latitude'], row['longitude']], radius=6, color=get_color(row.get('Kategori_Omzet_Actual', '')),
                 fill=True, fill_color=get_color(row.get('Kategori_Omzet_Actual', '')), fill_opacity=0.7,
@@ -239,35 +251,58 @@ if check_password():
                 popup=folium.Popup(popup_gwr, max_width=350), tooltip=f"{row['nama_cabang']} (Prediksi GWR)"
             ).add_to(layer_gwr)
     
-        m_ols = row.get('Mismatch_OLS', 'Match')
-        if m_ols != 'Match' and m_ols in sub_layers_ols:
-            folium.Marker(
-                location=[row['latitude'], row['longitude']],
-                icon=folium.Icon(color='red', icon='times', prefix='fa'),
-                popup=folium.Popup(popup_aktual, max_width=350), tooltip=f" OLS Mismatch: {row['nama_cabang']}"
-            ).add_to(sub_layers_ols[m_ols])
+            # --- PENANGANAN MARKER MATCH vs MISMATCH ---
+            # 1. Model OLS
+            m_ols = row.get('Mismatch_OLS', 'Match')
+            if m_ols == 'Match':
+                folium.Marker(
+                    location=[row['latitude'], row['longitude']],
+                    icon=folium.Icon(color='green', icon='check', prefix='fa'),
+                    popup=folium.Popup(popup_aktual, max_width=350), tooltip=f" OLS Match: {row['nama_cabang']}"
+                ).add_to(layer_match_ols)
+            elif m_ols in sub_layers_ols:
+                folium.Marker(
+                    location=[row['latitude'], row['longitude']],
+                    icon=folium.Icon(color='red', icon='times', prefix='fa'),
+                    popup=folium.Popup(popup_aktual, max_width=350), tooltip=f" OLS Mismatch: {row['nama_cabang']}"
+                ).add_to(sub_layers_ols[m_ols])
     
-        m_rf = row.get('Mismatch_RF', 'Match')
-        if m_rf != 'Match' and m_rf in sub_layers_rf:
-            folium.Marker(
-                location=[row['latitude'], row['longitude']],
-                icon=folium.Icon(color='orange', icon='times', prefix='fa'),
-                popup=folium.Popup(popup_rf, max_width=350), tooltip=f" RF Mismatch: {row['nama_cabang']}"
-            ).add_to(sub_layers_rf[m_rf])
+            # 2. Model Random Forest
+            m_rf = row.get('Mismatch_RF', 'Match')
+            if m_rf == 'Match':
+                folium.Marker(
+                    location=[row['latitude'], row['longitude']],
+                    icon=folium.Icon(color='green', icon='check', prefix='fa'),
+                    popup=folium.Popup(popup_rf, max_width=350), tooltip=f" RF Match: {row['nama_cabang']}"
+                ).add_to(layer_match_rf)
+            elif m_rf in sub_layers_rf:
+                folium.Marker(
+                    location=[row['latitude'], row['longitude']],
+                    icon=folium.Icon(color='orange', icon='times', prefix='fa'),
+                    popup=folium.Popup(popup_rf, max_width=350), tooltip=f" RF Mismatch: {row['nama_cabang']}"
+                ).add_to(sub_layers_rf[m_rf])
     
-        m_gwr = row.get('Mismatch_GWR', 'Match')
-        if m_gwr != 'Match' and m_gwr in sub_layers_gwr:
-            folium.Marker(
-                location=[row['latitude'], row['longitude']],
-                icon=folium.Icon(color='darkred', icon='times', prefix='fa'),
-                popup=folium.Popup(popup_gwr, max_width=350), tooltip=f" GWR Mismatch: {row['nama_cabang']}"
-            ).add_to(sub_layers_gwr[m_gwr])
+            # 3. Model GWR
+            m_gwr = row.get('Mismatch_GWR', 'Match')
+            if m_gwr == 'Match':
+                folium.Marker(
+                    location=[row['latitude'], row['longitude']],
+                    icon=folium.Icon(color='green', icon='check', prefix='fa'),
+                    popup=folium.Popup(popup_gwr, max_width=350), tooltip=f" GWR Match: {row['nama_cabang']}"
+                ).add_to(layer_match_gwr)
+            elif m_gwr in sub_layers_gwr:
+                folium.Marker(
+                    location=[row['latitude'], row['longitude']],
+                    icon=folium.Icon(color='darkred', icon='times', prefix='fa'),
+                    popup=folium.Popup(popup_gwr, max_width=350), tooltip=f" GWR Mismatch: {row['nama_cabang']}"
+                ).add_to(sub_layers_gwr[m_gwr])
     
+        # PENGELOMPOKAN LAYER DI MENU PETA (Ditambahkan layer_match_...)
         grouped_layers = {
             "Model Utama": [layer_aktual, layer_ols, layer_rf, layer_gwr],
-            " Mismatch OLS": list(sub_layers_ols.values()),
-            " Mismatch Random Forest": list(sub_layers_rf.values()),
-            " Mismatch GWR": list(sub_layers_gwr.values())
+            " Evaluasi Model OLS": [layer_match_ols] + list(sub_layers_ols.values()),
+            " Evaluasi Random Forest": [layer_match_rf] + list(sub_layers_rf.values()),
+            " Evaluasi Model GWR": [layer_match_gwr] + list(sub_layers_gwr.values())
         }
         plugins.GroupedLayerControl(grouped_layers, collapsed=False, exclusive_groups=False).add_to(m)
     
@@ -282,14 +317,15 @@ if check_password():
         m.get_root().header.add_child(folium.Element(css_fix))
 
         legend_html = '''
-             <div style="position: fixed; bottom: 25px; left: 25px; width: 255px; height: 185px; border: 1px solid #bbb; z-index:9999; font-size:10.5px; font-family: Arial, sans-serif; background-color: white; opacity: 0.95; padding: 10px; border-radius: 6px; box-shadow: 1px 1px 4px rgba(0,0,0,0.15);">
+             <div style="position: fixed; bottom: 25px; left: 25px; width: 255px; height: 200px; border: 1px solid #bbb; z-index:9999; font-size:10.5px; font-family: Arial, sans-serif; background-color: white; opacity: 0.95; padding: 10px; border-radius: 6px; box-shadow: 1px 1px 4px rgba(0,0,0,0.15);">
              <b style="font-size: 11.5px; display: block; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 2px;">Kriteria Omzet Cabang PGI</b>
              <div style="margin-bottom: 3px;"><i class="fa fa-circle" style="color:#9467bd; font-size: 11px;"></i> <b>Sangat Tinggi:</b> > Rp 1.000.000.000</div>
              <div style="margin-bottom: 3px;"><i class="fa fa-circle" style="color:#2ca02c; font-size: 11px;"></i> <b>Tinggi:</b> Rp 500.000.001 - Rp 1.000.000.000</div>
              <div style="margin-bottom: 3px;"><i class="fa fa-circle" style="color:#ff7f0e; font-size: 11px;"></i> <b>Sedang:</b> Rp 300.000.000 - Rp 500.000.000</div>
              <div style="margin-bottom: 5px;"><i class="fa fa-circle" style="color:#d62728; font-size: 11px;"></i> <b>Rendah:</b> < Rp 300.000.000</div>
              <hr style="margin: 4px 0; border: 0; border-top: 1px solid #eee;">
-             <div style="margin-top: 4px; font-size: 9.5px; color: #555; background: #fffde7; padding: 3px; border-radius: 3px; border-left: 2px solid #fbc02d;"><b style="color: #333;">Simbol Mismatch:</b> <i class="fa fa-times" style="color:red; font-weight:bold;"></i> (Tanda Silang)</div>
+             <div style="margin-top: 4px; font-size: 9.5px; color: #555; background: #f1f8e9; padding: 3px; border-radius: 3px; border-left: 2px solid #7cb342;"><b style="color: #333;">Match:</b> <i class="fa fa-check" style="color:green; font-weight:bold;"></i> (Centang Hijau)</div>
+             <div style="margin-top: 3px; font-size: 9.5px; color: #555; background: #fffde7; padding: 3px; border-radius: 3px; border-left: 2px solid #fbc02d;"><b style="color: #333;">Mismatch:</b> <i class="fa fa-times" style="color:red; font-weight:bold;"></i> (Tanda Silang)</div>
              </div>
              '''
         m.get_root().html.add_child(folium.Element(legend_html))
@@ -303,7 +339,7 @@ if check_password():
     # --- BAGIAN FOOTER / DATA VIEW ---
     st.markdown("---")
     
-    # --- SUMMARY PERFORMA MODEL (MATCH vs MISMATCH) ---
+    # --- SUMMARY PERFORMA MODEL (DIPERTANKAN PERSEJA SESUAI FORMAT AWAL) ---
     st.subheader("Ringkasan Performa Validasi Model")
     
     sum_col1, sum_col2, sum_col3 = st.columns(3)
