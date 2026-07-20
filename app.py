@@ -466,7 +466,15 @@ if check_password():
             st.info("Data Mismatch_GWR tidak ditemukan.")
 
     st.markdown("</br>", unsafe_allow_html=True)
-
+# --- TABLE EXPANDER: RINGKASAN SINGKAT UNTUK PENGAMBILAN KEPUTUSAN ---
+    with st.expander("Lihat Ringkasan Singkat untuk Pengambilan Keputusan"):
+        df_keputusan = pd.DataFrame({
+            "Sinyal Prediksi Model": ["Rendah", "Sedang", "Tinggi", "Sangat Tinggi"],
+            "Tingkat Kepercayaan (Precision)": ["86% Sangat Akurat", "65% Cukup Akurat", "78.2% Tinggi", "100% Maksimal"],
+            "Batas Risiko": ["Sangat Aman", "Ada Risiko Meleset 17.6%", "Risiko Rendah", "Bebas Risiko Pasar"],
+            "Strategi Biaya Sewa": ["Sangat Hemat (< Rp 15 Jt)", "Hati-hati / Moderat (< Rp 40 Jt)", "Agresif / Akselerasi (Maks Rp 150 Jt)", "Investasi Utama (Maks Rp 250 Jt)"]
+        })
+        st.dataframe(df_keputusan, use_container_width=True, hide_index=True)
     # --- EXPANDER DETAIL DATABASE ---
     with st.expander("Lihat Detail Database Cabang PGI"):
         kolom_tabel = ['nama_cabang', 'Omzet_Actual', 'Kategori_Omzet_Actual', 'Mismatch_OLS', 'Mismatch_RF', 'Mismatch_GWR']
