@@ -467,7 +467,7 @@ if check_password():
 
     st.markdown("</br>", unsafe_allow_html=True)
 # --- TABLE EXPANDER: RINGKASAN SINGKAT UNTUK PENGAMBILAN KEPUTUSAN ---
-    with st.expander("Lihat Ringkasan Singkat untuk Pengambilan Keputusan"):
+    with st.expander("Lihat Ringkasan Singkat untuk Pengambilan Keputusan (Baseline Random Forest)"):
         df_keputusan = pd.DataFrame({
             "Sinyal Prediksi Model": ["Rendah", "Sedang", "Tinggi", "Sangat Tinggi"],
             "Tingkat Kepercayaan (Precision)": ["86% Sangat Akurat", "65% Cukup Akurat", "78.2% Tinggi", "100% Maksimal"],
