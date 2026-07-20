@@ -472,7 +472,7 @@ if check_password():
             "Sinyal Prediksi Model": ["Rendah", "Sedang", "Tinggi", "Sangat Tinggi"],
             "Tingkat Kepercayaan (Precision)": ["86% Sangat Akurat", "65% Cukup Akurat", "78.2% Tinggi", "100% Maksimal"],
             "Batas Risiko": ["Sangat Aman", "Ada Risiko Meleset 17.6%", "Risiko Rendah", "Bebas Risiko Pasar"],
-            "Strategi Biaya Sewa": ["Sangat Hemat (< Rp 15 Jt)", "Hati-hati / Moderat (< Rp 40 Jt)", "Agresif / Akselerasi (Maks Rp 150 Jt)", "Investasi Utama (Maks Rp 250 Jt)"]
+            "Strategi Biaya Sewa": ["Sangat Hemat (< Rp 15 Jt) & Area Kabupaten", "Hati-hati / Moderat (< Rp 40 Jt)", "Agresif / Akselerasi (Maks Rp 150 Jt)", "Investasi Utama (Maks Rp 250 Jt)"]
         })
         st.dataframe(df_keputusan, use_container_width=True, hide_index=True)
     # --- EXPANDER DETAIL DATABASE ---
