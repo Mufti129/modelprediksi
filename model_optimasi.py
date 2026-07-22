@@ -44,7 +44,8 @@ if check_password():
     # --- FUNGSI LOADING DATABASE LANGSUNG DARI GOOGLE SHEETS ---
     @st.cache_data
     def load_data():
-        sheet_url = "https://docs.google.com/spreadsheets/d/15cug7vGihg3Pf2oTRl2EX_ySB55orD43a3A3-_6o7qo/export?format=csv&gid=1980765925"
+        sheet_url = "https://docs.google.com/spreadsheets/d/15cug7vGihg3Pf2oTRl2EX_ySB55orD43a3A3-_6o7qo/export?format=csv&gid=1005812824"
+        #https://docs.google.com/spreadsheets/d/15cug7vGihg3Pf2oTRl2EX_ySB55orD43a3A3-_6o7qo/edit?gid=1005812824#gid=1005812824 >>> 1980765925"
         df = pd.read_csv(sheet_url)
         return df
     
